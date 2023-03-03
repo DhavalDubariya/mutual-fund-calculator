@@ -5,6 +5,7 @@ const request = require("request")
 
 const getMutualFundsListModule = async () => {
     try {
+        console.log("enter")
         const mutualFundCompanyListURL = "https://api.mfapi.in/mf"
 
         const options = {
