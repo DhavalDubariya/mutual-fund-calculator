@@ -12,9 +12,19 @@ const formateDateLib = async (date) => {
     // minute = d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes(),
     // second = d.getSeconds() < 10 ? "0" + d.getSeconds() : d.getSeconds()
 
-    var str = [day, month, year].join("-")
+    var str = [month, day, year].join("-")
     var formatedDate = str // `${str} ${hour}:${minute}:${second}`
     return formatedDate
+}
+
+const formatDateToIST = async (date) => {
+    var d = new Date(date),
+        month = 1 + d.getMonth() < 10 ? "0" + (d.getMonth() + 1) : d.getMonth() + 1,
+        day = d.getDate() < 10 ? "0" + d.getDate() : d.getDate(),
+        year = d.getFullYear()
+
+    var str = [day, month, year].join("-")
+    return str
 }
 
 const getRandomString = async (len) => {
@@ -62,6 +72,7 @@ const getResponseURL = async (schemeCode) => {
 
 module.exports = {
     formateDateLib: formateDateLib,
+    formatDateToIST: formatDateToIST,
     getRandomString: getRandomString,
     getResponseURL: getResponseURL
 }
