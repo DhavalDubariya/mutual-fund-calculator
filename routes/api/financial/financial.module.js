@@ -64,21 +64,68 @@ const finacialSpiModule = async (req) => {
     status: true,
     data: {
       sip_calc_years: sipCalculactionc,
-      sip_calc: {
-        total_investment:sipCalculactionc[sipCalculactionc.length - 1].total_investment,
-        returns: sipCalculactionc[sipCalculactionc.length - 1].returns,
-        total_value: sipCalculactionc[sipCalculactionc.length - 1].total_value,
-        year:sipCalculactionc[sipCalculactionc.length - 1].year
-      },
+      sip_calc:sipCalculactionc[sipCalculactionc.length - 1],
     },
   };
   return result;
 };
 
 const finacialLumpSumModule = async(req) => {
-  return {
-    status:true
+
+  var totleInvestment = req.body.totle_investment;
+  var expectedReturn = req.body.expected_return;
+  var timePeriod = req.body.time_period;
+
+  if (
+    totleInvestment == undefined ||
+    totleInvestment == "" ||
+    totleInvestment == null ||
+    expectedReturn == undefined ||
+    expectedReturn == null ||
+    expectedReturn == "" ||
+    timePeriod == undefined ||
+    timePeriod == "" ||
+    timePeriod == null
+  ) {
+    return {
+      status: false,
+      error: constant.requestMessages.ERR_INVALID_BODY,
+    };
   }
+
+  async function lumSumCalculaction(totleInvestment,expectedReturn,timePeriod){
+    var currentYear = new Date().getFullYear()
+    var dataArray = [];
+
+    for(let i=1;i<timePeriod + 1;i++){    
+      var intrestRate = expectedReturn/100
+      var midalValue = 1 + intrestRate
+      var endValue = midalValue ** i
+      var totle_value = Math.round(totleInvestment * endValue)
+      var totle_investment = totleInvestment
+      var returns = totle_value - totle_investment
+      var nextYear = currentYear + i;
+      var result = {
+        totle_investment:totle_investment.toLocaleString(),
+        totle_value:totle_value.toLocaleString(),
+        returns:returns.toLocaleString(),
+        "year":nextYear
+      }
+      dataArray.push(result)
+    }
+
+    return dataArray
+
+  }
+  var lumsumValue = await lumSumCalculaction(totleInvestment,expectedReturn,timePeriod)
+  var result = {
+    status:true,
+    data:{
+      lumsum_calc_year:lumsumValue,
+      lumsum_calc:lumsumValue[lumsumValue.length-1]  
+    }
+  }
+  return result
 }
 
 module.exports = {
