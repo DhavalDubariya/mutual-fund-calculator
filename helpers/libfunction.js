@@ -3,17 +3,10 @@ const router = express.Router()
 const request = require("request")
 
 const formateDateLib = async (date) => {
-    date = date.toLocaleDateString("en-GB")
-    var d = new Date(date),
-        month = 1 + d.getMonth() < 10 ? "0" + (d.getMonth() + 1) : d.getMonth() + 1,
-        day = d.getDate() < 10 ? "0" + d.getDate() : d.getDate(),
-        year = d.getFullYear()
-    // hour = d.getHours() < 10 ? "0" + d.getHours() : d.getHours(),
-    // minute = d.getMinutes() < 10 ? "0" + d.getMinutes() : d.getMinutes(),
-    // second = d.getSeconds() < 10 ? "0" + d.getSeconds() : d.getSeconds()
+    const now = new Date(date)
+    const options = { day: "2-digit", month: "2-digit", year: "numeric" }
+    const formatedDate = now.toLocaleDateString("en-IN", options).split("/").join("-")
 
-    var str = [day, month, year].join("-")
-    var formatedDate = str // `${str} ${hour}:${minute}:${second}`
     return formatedDate
 }
 
@@ -42,9 +35,8 @@ const getResponseURL = async (schemeCode) => {
         var response = await new Promise(function (resolve, reject) {
             request.get(options, (error, result) => {
                 if (error) throw new Error(error)
-
                 var data = JSON.parse(result.body)
-                console.log("result: ", data)
+                // console.log("result: ", data)
                 resolve(data)
             })
         })
