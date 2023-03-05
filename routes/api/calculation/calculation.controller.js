@@ -7,6 +7,12 @@ const calculateSIPPerformanceController = async (req, res) => {
     return res.send(result)
 }
 
+const calculateSpiController = async(req,res) => {
+    var result = await calculationModule.calculateSpiModule(req)
+    return res.send(result)
+}
+
 module.exports = {
-    calculateSIPPerformanceController: calculateSIPPerformanceController
+    calculateSIPPerformanceController: calculateSIPPerformanceController,
+    calculateSpiController:calculateSpiController
 }
