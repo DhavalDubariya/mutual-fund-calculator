@@ -2,6 +2,8 @@ const express = require("express")
 const router = express.Router()
 const dotenv = require("dotenv").config()
 const request = require("request")
+const { differenceInMonths } = require("date-fns")
+const moment = require("moment")
 const LibFunction = require("../../../helpers/libfunction")
 const constant = require("../../../helpers/constant")
 
@@ -19,31 +21,32 @@ const calculateSIPPerformanceModule = async (req) => {
         }
     }
 
-    SIPStartDate = !Number(SIPStartDate) ? SIPStartDate.toString() : Number(SIPStartDate)
-    SIPEndDate = !Number(SIPEndDate) ? SIPEndDate.toString() : Number(SIPEndDate)
-    valuationDate = !Number(valuationDate) ? valuationDate.toString() : Number(valuationDate)
+    SIPStartDate = new Date(SIPStartDate)
+    SIPEndDate = new Date(SIPEndDate)
+    valuationDate = new Date(valuationDate)
 
-    const formatedStartDate = await LibFunction.formatDateToIST(new Date(SIPStartDate))
-    const formatedEndDate = await LibFunction.formatDateToIST(new Date(SIPEndDate))
-    const formatedValuationDate = await LibFunction.formatDateToIST(new Date(valuationDate))
-
-    const totalAmountInvested = differenceInMonths(new Date(SIPEndDate), new Date(SIPStartDate)) * SIPAmount
+    const totalAmountInvested = (differenceInMonths(new Date(SIPEndDate), new Date(SIPStartDate)) + 1) * SIPAmount
     const getSchemeCodeData = await LibFunction.getResponseURL(schemeCode)
     if (!getSchemeCodeData.status) {
         return getSchemeCodeData
     }
 
+    console.log(getSchemeCodeData)
+
+    const skipDay = 1
     const schemeCodeData = getSchemeCodeData.data
-    // console.log([formatedStartDate, formatedEndDate, formatedValuationDate], new Date(new Date(SIPStartDate).setDate(new Date(SIPStartDate).getDate() + 1)))
 
-    var SIPStartDateNavData = schemeCodeData.data.filter((obj) => obj.date == formatedStartDate)
-    if (SIPStartDateNavData.length == 0) {
-        console.log("if")
-        var date1 = await LibFunction.formateDateLib(new Date(SIPStartDate))
-        date1 = await LibFunction.formatDateToIST(new Date(new Date(date1).setDate(new Date(date1).getDate() + 1)))
+    var formatedDate = await LibFunction.formateDateLib(SIPStartDate)
+    var SIPStartDateNavData = []
+    SIPStartDateNavData = await filterData(SIPStartDateNavData, schemeCodeData, formatedDate, skipDay, SIPStartDate, true)
+    StartDateNav = SIPStartDateNavData.nav
 
-        SIPStartDateNavData = schemeCodeData.data.filter((obj) => obj.date == findDate)
-    }
+    var formatedValuationDate = await LibFunction.formateDateLib(valuationDate)
+    var SIPValuationDateNavData = []
+    var SIPValuationDateNavData = filterData(SIPValuationDateNavData, schemeCodeData, formatedValuationDate, skipDay, valuationDate, false)
+
+    const totalUnitsAccumulated = totalAmountInvested / StartDateNav
+    const currentValue = totalUnitsAccumulated * valuationDateNav
 
     return {
         totalAmountInvested: totalAmountInvested,
@@ -89,4 +92,23 @@ const calculateSpiModule = async (req) => {
 module.exports = {
     calculateSIPPerformanceModule: calculateSIPPerformanceModule,
     calculateSpiModule: calculateSpiModule
+}
+
+async function filterData(SIPStartDateNavData, schemeCodeData, formatedDate, skipDay, searchDate, flag) {
+    SIPStartDateNavData = schemeCodeData.data.filter((obj) => obj.date == formatedDate)
+    if (SIPStartDateNavData.length == 0) {
+        if (flag) {
+            formatedDate = await LibFunction.formateDateLib(new Date(searchDate).setDate(new Date(searchDate).getDate() + skipDay))
+            skipDay++
+        } else {
+            if (new Date().getDate() == new Date(searchDate).getDate() && new Date().getMonth() == new Date(searchDate).getMonth() && new Date().getFullYear() == new Date(searchDate).getFullYear()) {
+                formatedDate = await LibFunction.formateDateLib(new Date(searchDate).setDate(new Date(searchDate).getDate() - skipDay))
+                skipDay++
+            } else if (new Date() > new Date(searchDate)) {
+            }
+        }
+        SIPStartDateNavData = filterData(SIPStartDateNavData, schemeCodeData, formatedDate, skipDay, searchDate, flag)
+    }
+
+    return SIPStartDateNavData
 }
