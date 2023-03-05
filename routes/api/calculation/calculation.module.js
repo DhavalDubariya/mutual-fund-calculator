@@ -7,9 +7,9 @@ const constant = require("../../../helpers/constant")
 const calculateSIPPerformanceModule = async (req) => {
     const schemeCode = req.body.scheme_code
     const SIPAmount = req.body.sip_amount
-    const SIPStartDate = req.body.sip_start_date
-    const SIPEndDate = req.body.sip_end_date
-    const valuationDate = req.body.valuation_date
+    var SIPStartDate = req.body.sip_start_date
+    var SIPEndDate = req.body.sip_end_date
+    var valuationDate = req.body.valuation_date
 
     if (!schemeCode || !SIPAmount || !SIPStartDate || !SIPEndDate || !valuationDate) {
         return {
