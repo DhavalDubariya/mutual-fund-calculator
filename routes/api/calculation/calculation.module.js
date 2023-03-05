@@ -48,25 +48,51 @@ const calculateSpiModule = async (req) => {
     };
   }
 
-  async function calculateSIP(monthlyInvestment, expectedReturn, timePeriod, inflationRate) {
-
-    var exp = expectedReturn / 100
-    var n = timePeriod * 12
-    var i = exp/12
-    var oneI = 1 + i
-    var onePower =Math.pow(oneI, n)
-    var onePowerSubtrect = onePower - 1 
-    var middle = onePowerSubtrect/i
-    // var M = P * ({[1 + i]n - 1} / i) * (1 + i)
-    var total_value = Math.round(monthlyInvestment * middle * oneI)
-    var total_investment = monthlyInvestment * n
-    var returns = total_value - total_investment
-    return {
-        total_value,returns,total_investment
-    };
-  }
   
-  const result = calculateSIP(monthlySipAmount, expectedReturn, timePeriod);
+  async function calculateSIP(monthlyInvestment, expectedReturn, timePeriod) {
+    var currentYear = new Date().getFullYear()
+    var dataArray = [];
+    for (let i = 1; i < timePeriod + 1; i++) {
+      var exp = expectedReturn / 100;
+      var n = i * 12;
+      var iPerod = exp / 12;
+      var oneI = 1 + iPerod;
+      var onePower = Math.pow(oneI, n);
+      var onePowerSubtrect = onePower - 1;
+      var middle = onePowerSubtrect / iPerod;
+      // var M = P * ({[1 + i]n - 1} / i) * (1 + i)
+      var total_value = Math.round(monthlyInvestment * middle * oneI);
+      var total_investment = monthlyInvestment * n;
+      var returns = total_value - total_investment;
+      var nextYear = currentYear + i;
+      var result = {
+        total_investment: total_investment.toLocaleString(),
+        returns: returns.toLocaleString(),
+        total_value: total_value.toLocaleString(),
+        "year":nextYear
+      };
+      dataArray.push(result);
+    }
+    return dataArray;
+  }
+
+  const sipCalculactionc = await calculateSIP(
+    monthlySipAmount,
+    expectedReturn,
+    timePeriod
+  );
+  var result = {
+    status: true,
+    data: {
+      sip_calc_years: sipCalculactionc,
+      sip_calc: {
+        total_investment:sipCalculactionc[sipCalculactionc.length - 1].total_investment,
+        returns: sipCalculactionc[sipCalculactionc.length - 1].returns,
+        total_value: sipCalculactionc[sipCalculactionc.length - 1].total_value,
+        year:sipCalculactionc[sipCalculactionc.length - 1].year
+      },
+    },
+  };
   return result;
 };
 
