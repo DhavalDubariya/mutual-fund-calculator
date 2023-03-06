@@ -128,7 +128,57 @@ const finacialLumpSumModule = async(req) => {
   return result
 }
 
+const finacialCarloneModule = async(req) => {
+  
+  var lonaAmount = req.body.loan_amount
+  var intrestRate = req.body.intrest_rate
+  var tenure = req.body.tenure_year
+
+  if(lonaAmount == undefined || lonaAmount == "" || lonaAmount == null || intrestRate == "" || intrestRate == null || intrestRate == undefined || tenure == null || tenure == "" || tenure == undefined){
+    return {
+      status:false,
+      error:constant.requestMessages.ERR_INVALID_BODY
+    }
+  }
+  async function carLoanEmiCalculator(lonaAmount,intrestRate,tenure) {
+    var P = lonaAmount
+    const R = (intrestRate / 100) / 12  
+    const N = tenure * 12
+    const EMI = (P * R * ( (1 + R) ** N ))/ ( ((1 + R) ** N) - 1 )
+
+    const totleAmount = EMI * N
+    const totleIntrest = totleAmount - lonaAmount
+
+    var changeLoanAmount = lonaAmount
+    var dataArray = []
+    for(let i=0;i<N;i++){
+      var intrest_charge = (R * changeLoanAmount)
+      var principal_paid = EMI - intrest_charge
+      var changeLoanAmount = changeLoanAmount - principal_paid
+      var result = {
+        intrest_charge:Math.round(intrest_charge).toLocaleString(),
+        principal_paid:Math.round(principal_paid).toLocaleString(),
+        changeLoanAmount:Math.round(changeLoanAmount).toLocaleString()
+      }
+      dataArray.push(result)
+    }
+
+    var result ={
+      monthly_emi:Math.round(EMI),
+      totle_amount:Math.round(totleAmount),
+      totle_intrest:Math.round(totleIntrest),
+      principal_amount:lonaAmount,
+      dataArray
+    }
+    return result
+  }
+
+  var carLoanEmiCalc = await carLoanEmiCalculator(lonaAmount,intrestRate,tenure)
+  return carLoanEmiCalc
+}
+
 module.exports = {
     finacialSpiModule: finacialSpiModule,
-    finacialLumpSumModule:finacialLumpSumModule
+    finacialLumpSumModule:finacialLumpSumModule,
+    finacialCarloneModule:finacialCarloneModule
 };
