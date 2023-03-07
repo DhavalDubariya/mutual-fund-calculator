@@ -1,6 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const request = require("request")
+const constant = require("./constant")
 
 const formateDateLib = async (date) => {
     const now = new Date(date)
@@ -40,6 +41,14 @@ const getResponseURL = async (schemeCode) => {
                 resolve(data)
             })
         })
+
+        if (response.data.length == 0) {
+            return {
+                status: false,
+                error: constant.inValidAuthentication
+            }
+        }
+        
         return {
             status: true,
             data: response
