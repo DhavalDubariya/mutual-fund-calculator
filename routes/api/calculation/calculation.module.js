@@ -7,69 +7,6 @@ const moment = require("moment")
 const LibFunction = require("../../../helpers/libfunction")
 const constant = require("../../../helpers/constant")
 
-const calculateSIPPerformanceModule_COPY = async (req) => {
-    const schemeCode = req.body.scheme_code
-    const SIPAmount = req.body.sip_amount
-    var SIPStartDate = req.body.sip_start_date
-    var SIPEndDate = req.body.sip_end_date
-    var valuationDate = req.body.valuation_date
-
-    if (!schemeCode || !SIPAmount || !SIPStartDate || !SIPEndDate || !valuationDate) {
-        return {
-            status: false,
-            error: constant.requestMessages.ERR_INVALID_BODY
-        }
-    }
-
-    SIPStartDate = new Date(SIPStartDate)
-    SIPEndDate = new Date(SIPEndDate)
-    valuationDate = new Date(valuationDate)
-
-    const monthDiff = differenceInMonths(new Date(SIPEndDate), new Date(SIPStartDate)) + 1
-    const totalAmountInvested = monthDiff * Number(SIPAmount)
-    var finalTable = []
-    const getSchemeCodeData = await LibFunction.getResponseURL(schemeCode)
-    if (!getSchemeCodeData.status) {
-        return getSchemeCodeData
-    }
-
-    console.log(getSchemeCodeData)
-
-    const skipDay = 1
-    const schemeCodeData = getSchemeCodeData.data
-    const schemeCodeMaxDate = new Date(`${schemeCodeData.data[0].date.split("-")[2]}-${schemeCodeData.data[0].date.split("-")[1]}-${schemeCodeData.data[0].date.split("-")[0]}`)
-    const schemeCodeMinDate = new Date(`${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[2]}-${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[1]}-${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[0]}`)
-
-    var formatedSIPStartDate = await LibFunction.formateDateLib(SIPStartDate)
-    var formatedValuationDate = await LibFunction.formateDateLib(valuationDate)
-    var SIPStartDateNavData = []
-    var SIPValuationDateNavData = []
-
-    if (schemeCodeMaxDate < SIPStartDate || schemeCodeMinDate > SIPStartDate || schemeCodeMaxDate < valuationDate || schemeCodeMinDate > valuationDate) {
-        return {
-            status: false,
-            error: constant.requestMessages.ERR_DATE_OUT_OF_BOUND
-        }
-    }
-    SIPStartDateNavData = await filterStartDateData(SIPStartDateNavData, schemeCodeData, formatedSIPStartDate, skipDay, SIPStartDate)
-    var StartDateNav = Number(SIPStartDateNavData[0].nav)
-
-    SIPValuationDateNavData = await filterValuationDateData(SIPValuationDateNavData, schemeCodeData, formatedValuationDate, skipDay, valuationDate, false)
-    var valuationDateNav = Number(SIPValuationDateNavData[0].nav)
-
-    const totalUnitsAccumulated = Number(totalAmountInvested) / Number(StartDateNav).toFixed(2)
-    const currentValue = (Number(totalUnitsAccumulated) * Number(valuationDateNav)).toFixed(2)
-    const profitLoss = (Number(currentValue) - Number(totalAmountInvested)).toFixed(2)
-    const absoluteReturn = (((Number(currentValue) - Number(totalAmountInvested)) * 100) / totalAmountInvested).toFixed(2)
-
-    return {
-        totalAmountInvested: totalAmountInvested,
-        currentValue: currentValue,
-        profitLoss: profitLoss,
-        absoluteReturn: absoluteReturn
-    }
-}
-
 const calculateSIPPerformanceModule = async (req) => {
     const schemeCode = req.body.scheme_code
     const SIPAmount = req.body.sip_amount
@@ -106,10 +43,10 @@ const calculateSIPPerformanceModule = async (req) => {
     var formatedSIPStartDate = await LibFunction.formateDateLib(SIPStartDate)
     var formatedValuationDate = await LibFunction.formateDateLib(valuationDate)
 
-    SIPStartDateNavData = await filterStartDateData(SIPStartDateNavData, schemeCodeData, formatedSIPStartDate, skipDay, SIPStartDate)
+    SIPStartDateNavData = await filterStartDateData(false, SIPStartDateNavData, schemeCodeData, formatedSIPStartDate, skipDay, SIPStartDate)
     var StartDateNav = Number(SIPStartDateNavData[0].nav)
 
-    SIPValuationDateNavData = await filterValuationDateData(SIPValuationDateNavData, schemeCodeData, formatedValuationDate, skipDay, valuationDate, false)
+    SIPValuationDateNavData = await filterValuationDateData(false, SIPValuationDateNavData, schemeCodeData, formatedValuationDate, skipDay, valuationDate)
     var valuationDateNav = Number(SIPValuationDateNavData[0].nav)
 
     const totalUnitsAccumulated = Number(totalAmountInvested) / Number(StartDateNav)
@@ -141,8 +78,52 @@ const calculateSIPPerformanceModule = async (req) => {
     return data
 }
 
+const navFinderModule = async (req) => {
+    const schemeCode = req.body.scheme_code
+    var SIPStartDate = req.body.sip_start_date
+    var SIPEndDate = req.body.sip_end_date
+
+    if (!schemeCode || new Date(SIPStartDate) > new Date(SIPEndDate)) {
+        return {
+            status: false,
+            error: constant.requestMessages.ERR_INVALID_BODY
+        }
+    }
+
+    const getSchemeCodeData = await LibFunction.getResponseURL(schemeCode)
+    if (!getSchemeCodeData.status) {
+        return getSchemeCodeData
+    }
+
+    console.log(getSchemeCodeData)
+
+    const schemeCodeData = getSchemeCodeData.data
+
+    const skipDay = 1
+    var formatedSIPStartDate = await LibFunction.formateDateLib(SIPStartDate)
+    var formatedEndDate = await LibFunction.formateDateLib(SIPEndDate)
+
+    var startIndex = await filterStartDateData(true, null, schemeCodeData, formatedSIPStartDate, skipDay, SIPStartDate)
+    var lastIndex = await filterValuationDateData(true, null, schemeCodeData, formatedEndDate, skipDay, SIPEndDate)
+    console.log(startIndex, lastIndex)
+    var result = []
+    for (let i = lastIndex; i <= startIndex; i++) {
+        var data = {
+            "date": schemeCodeData.data[i].date,
+            "nav": await formatNumber(schemeCodeData.data[i].nav)
+        }
+        result.push(data)
+    }
+
+    return {
+        status: true,
+        data: result
+    }
+}
+
 module.exports = {
-    calculateSIPPerformanceModule: calculateSIPPerformanceModule
+    calculateSIPPerformanceModule: calculateSIPPerformanceModule,
+    navFinderModule: navFinderModule
 }
 
 async function setFinalData(finalTableData, monthDiff, SIPStartDate, SIPAmount, schemeCodeData, schemeCodeMaxDate, schemeCodeMinDate, SIPAmount, skipDay) {
@@ -162,7 +143,7 @@ async function setFinalData(finalTableData, monthDiff, SIPStartDate, SIPAmount, 
             break
         }
 
-        schemeNAVData = await filterStartDateData(schemeNAVData, schemeCodeData, formatedSIPStartDate, skipDay, SIPStartDate)
+        schemeNAVData = await filterStartDateData(false, schemeNAVData, schemeCodeData, formatedSIPStartDate, skipDay, SIPStartDate)
 
         finalTableData[i]["date"] = schemeNAVData[0]["date"]
         finalTableData[i]["sip_amount"] = await formatNumber(SIPAmount)
@@ -174,36 +155,46 @@ async function setFinalData(finalTableData, monthDiff, SIPStartDate, SIPAmount, 
     return finalTableData
 }
 
-async function filterStartDateData(SIPStartDateNavData, schemeCodeData, formatedSIPDate, skipDay, SIPStartDate) {
+async function filterStartDateData(findIndexFlag, SIPStartDateNavData, schemeCodeData, formatedSIPDate, skipDay, SIPStartDate) {
     console.log("filterStartDateData", skipDay, formatedSIPDate)
-    SIPStartDateNavData = schemeCodeData.data.filter((obj) => obj.date == formatedSIPDate)
-    if (SIPStartDateNavData.length == 0) {
-        formatedSIPDate = await LibFunction.formateDateLib(new Date(SIPStartDate).setDate(new Date(SIPStartDate).getDate() + skipDay))
+    if (findIndexFlag) {
+        SIPStartDateNavData = schemeCodeData.data.findIndex((obj) => obj.date == formatedSIPDate)
+    } else {
+        SIPStartDateNavData = schemeCodeData.data.filter((obj) => obj.date == formatedSIPDate)
+    }
+
+    if ((SIPStartDateNavData.length == 0 && !findIndexFlag) || (SIPStartDateNavData < 0 && findIndexFlag)) {
+        if (new Date() < new Date(SIPStartDate) || new Date(schemeCodeData.data[0].date) < new Date(SIPStartDate)) {
+            formatedSIPDate = schemeCodeData.data[1].date
+        } else if (new Date(schemeCodeData.data[schemeCodeData.data.length - 1].date) > new Date(SIPStartDate)) {
+            formatedSIPDate = schemeCodeData.data[schemeCodeData.data.length - 1].date
+        } else {
+            formatedSIPDate = await LibFunction.formateDateLib(new Date(SIPStartDate).setDate(new Date(SIPStartDate).getDate() + skipDay))
+        }
         skipDay++
-        SIPStartDateNavData = filterStartDateData(SIPStartDateNavData, schemeCodeData, formatedSIPDate, skipDay, SIPStartDate)
+        SIPStartDateNavData = filterStartDateData(findIndexFlag, SIPStartDateNavData, schemeCodeData, formatedSIPDate, skipDay, SIPStartDate)
     }
     return SIPStartDateNavData
 }
 
-async function filterValuationDateData(SIPValuationDateNavData, schemeCodeData, formatedValuationDate, skipDay, valuationDate, backFlag) {
+async function filterValuationDateData(findIndexFlag, SIPValuationDateNavData, schemeCodeData, formatedDate, skipDay, SIPLastDate) {
     console.log("filterValuationDateData", skipDay)
-    SIPValuationDateNavData = schemeCodeData.data.filter((obj) => obj.date == formatedValuationDate)
-    if (SIPValuationDateNavData.length == 0) {
-        const sameDate = new Date().getFullYear() === new Date(valuationDate).getFullYear() && new Date().getMonth() === new Date(valuationDate).getMonth() && new Date().getDate() === new Date(valuationDate).getDate()
-        if (sameDate) {
-            backFlag = true
-            formatedValuationDate = await LibFunction.formateDateLib(new Date(valuationDate).setDate(new Date(valuationDate).getDate() - skipDay))
-        } else if (new Date() > new Date(valuationDate)) {
-            if (backFlag) {
-                formatedValuationDate = await LibFunction.formateDateLib(new Date(valuationDate).setDate(new Date(valuationDate).getDate() - skipDay))
-            } else {
-                formatedValuationDate = await LibFunction.formateDateLib(new Date(valuationDate).setDate(new Date(valuationDate).getDate() + skipDay))
-            }
-        } else if (new Date() < new Date(valuationDate)) {
-            formatedValuationDate = await LibFunction.formateDateLib(new Date())
+    if (findIndexFlag) {
+        SIPValuationDateNavData = schemeCodeData.data.findIndex((obj) => obj.date == formatedDate)
+    } else {
+        SIPValuationDateNavData = schemeCodeData.data.filter((obj) => obj.date == formatedDate)
+    }
+
+    if ((SIPValuationDateNavData.length == 0 && !findIndexFlag) || (SIPValuationDateNavData < 0 && findIndexFlag)) {
+        if (new Date() < new Date(SIPLastDate) || new Date(schemeCodeData.data[0].date) < new Date(SIPLastDate)) {
+            formatedDate = schemeCodeData.data[0].date
+        } else if (new Date(schemeCodeData.data[schemeCodeData.data.length - 1].date) > new Date(SIPLastDate)) {
+            formatedDate = schemeCodeData.data[schemeCodeData.data.length - 2].date
+        } else {
+            formatedDate = await LibFunction.formateDateLib(new Date(SIPLastDate).setDate(new Date(SIPLastDate).getDate() - skipDay))
         }
         skipDay++
-        SIPValuationDateNavData = filterValuationDateData(SIPValuationDateNavData, schemeCodeData, formatedValuationDate, skipDay, valuationDate, backFlag)
+        SIPValuationDateNavData = filterValuationDateData(SIPValuationDateNavData, schemeCodeData, formatedDate, skipDay, SIPLastDate)
     }
     return SIPValuationDateNavData
 }
