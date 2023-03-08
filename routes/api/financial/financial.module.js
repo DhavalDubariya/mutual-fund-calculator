@@ -177,8 +177,44 @@ const finacialCarloneModule = async(req) => {
   return carLoanEmiCalc
 }
 
+// compoundInterst Calculaction
+
+async function compoundInterast(principalAmount,intrestRate,timePeriod,compounDingFreq){
+  if(compounDingFreq == "year"){
+    var compoundInterast = principalAmount * (1 + (intrestRate/100) ) ** timePeriod
+    return compoundInterast
+  }
+  if(compounDingFreq == "halfyear"){
+    var compoundInterast = principalAmount * (1 + ((intrestRate/100)/2) ) ** (timePeriod * 2 )
+    return compoundInterast
+  }
+  if(compounDingFreq == "quarterly"){
+    var compoundInterast = principalAmount * (1 + ((intrestRate/100)/4) ) ** (timePeriod * 4 )
+    return compoundInterast
+  }
+}
+
+const finacialCompoundInterestModule = async (req) => {
+  var principalAmount = req.body.principal_amount
+  var intrestRate = req.body.intrest_rate
+  var timePeriod = req.body.time_period
+  var compounDingFreq = req.body.compounding_frequency
+  
+
+  if(principalAmount == undefined || principalAmount == null || principalAmount == "" || intrestRate == null || intrestRate == undefined || intrestRate == "" || timePeriod == undefined || timePeriod == null || timePeriod =="" ){
+    return {
+      status:false,
+      error:constant.requestMessages.ERR_DATE_OUT_OF_BOUND
+    }
+  }
+  
+  var compoundInterastValue = await compoundInterast(principalAmount,intrestRate,timePeriod,compounDingFreq)
+  return {compoundInterast:compoundInterastValue.toLocaleString()}
+}
+
 module.exports = {
     finacialSpiModule: finacialSpiModule,
     finacialLumpSumModule:finacialLumpSumModule,
-    finacialCarloneModule:finacialCarloneModule
+    finacialCarloneModule:finacialCarloneModule,
+    finacialCompoundInterestModule:finacialCompoundInterestModule
 };

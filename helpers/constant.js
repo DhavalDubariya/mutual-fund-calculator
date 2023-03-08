@@ -16,6 +16,10 @@ module.exports.requestMessages = {
     },
     ERR_INVALID_BODY: {
         code: 9001,
-        message: "Imvalid body. Please fill all required fields."
+        message: "Invalid body. Please fill all required fields."
+    },
+    ERR_DATE_OUT_OF_BOUND: {
+        code: 9002,
+        message: "Error! The fund you have selected has no related data with the dates you have selected."
     }
 }
