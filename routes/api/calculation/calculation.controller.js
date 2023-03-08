@@ -7,6 +7,12 @@ const calculateSIPPerformanceController = async (req, res) => {
     return res.send(result)
 }
 
+const navFinderController = async (req, res) => {
+    var result = await calculationModule.navFinderModule(req)
+    return res.send(result)
+}
+
 module.exports = {
-    calculateSIPPerformanceController: calculateSIPPerformanceController
+    calculateSIPPerformanceController: calculateSIPPerformanceController,
+    navFinderController: navFinderController
 }
