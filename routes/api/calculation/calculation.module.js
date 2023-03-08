@@ -112,8 +112,8 @@ const calculateSIPPerformanceModule = async (req) => {
     SIPValuationDateNavData = await filterValuationDateData(SIPValuationDateNavData, schemeCodeData, formatedValuationDate, skipDay, valuationDate, false)
     var valuationDateNav = Number(SIPValuationDateNavData[0].nav)
 
-    const totalUnitsAccumulated = Number(totalAmountInvested) / Number(StartDateNav).toFixed(2)
-    const currentValue = (Number(totalUnitsAccumulated) * Number(valuationDateNav)).toFixed(2)
+    const totalUnitsAccumulated = Number(totalAmountInvested) / Number(StartDateNav)
+    const currentValue = Number(totalUnitsAccumulated) * Number(valuationDateNav)
 
     var finalTableData = []
 
@@ -127,11 +127,16 @@ const calculateSIPPerformanceModule = async (req) => {
     }
 
     finalTableData = await setFinalData(finalTableData, monthDiff, SIPStartDate, SIPAmount, schemeCodeData, schemeCodeMaxDate, schemeCodeMinDate, SIPAmount, skipDay)
-    // return finalTableData
 
     var data = {
-        "totalAmountInvested": totalAmountInvested,
-        "currentValue": currentValue
+        "total_amount_invested": await formatNumber(totalAmountInvested),
+        "current_value": await formatNumber(currentValue),
+        "profit_loss": await formatNumber(currentValue - totalAmountInvested),
+        "sip_amount": await formatNumber(SIPAmount),
+        "current_nav": await formatNumber(valuationDateNav),
+        "cagr": undefined,
+        "absolute_return": await formatNumber(((currentValue - totalAmountInvested) * 100) / totalAmountInvested),
+        "graph_data": finalTableData
     }
     return data
 }
