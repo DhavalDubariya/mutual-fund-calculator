@@ -51,7 +51,7 @@ const getMutualFundsSchemeListModule = async () => {
             }
         }
         const getSchemeData = await LibFunction.getResponseURL(options)
-        console.log(getSchemeData, JSON.parse(getSchemeData.data))
+        // console.log(getSchemeData, JSON.parse(getSchemeData.data))
         if (!getSchemeData.status) {
             return getSchemeData
         }
@@ -60,7 +60,7 @@ const getMutualFundsSchemeListModule = async () => {
         if (schemeData.length == 0 || !schemeData) {
             return getSchemeData
         }
-        console.log("done")
+        // console.log("done")
         var result = []
         for (let i = 0; i < schemeData.length; i++) {
             // const schemeDataURL = `https://api.mfapi.in/mf/${response1[i].schemeCode}`
