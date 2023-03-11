@@ -67,11 +67,11 @@ const calculateSIPPerformanceModule = async (req) => {
     }
 
     const getSchemeCodeData = await LibFunction.getResponseURL(options)
-    console.log(getSchemeCodeData)
+    // console.log(getSchemeCodeData)
     if (!getSchemeCodeData.status) {
         return getSchemeCodeData
     }
-    console.log(getSchemeCodeData)
+    // console.log(getSchemeCodeData)
 
     const schemeCodeData = JSON.parse(getSchemeCodeData.data)
     if (schemeCodeData.length == 0 || !JSON.parse(getSchemeCodeData.data)) {
@@ -329,6 +329,7 @@ async function filterStartDateData(findIndexFlag, SIPStartDateNavData, schemeCod
 
 async function filterValuationDateData(findIndexFlag, SIPValuationDateNavData, schemeCodeData, formatedDate, skipDay, SIPLastDate) {
     console.log("filterValuationDateData", skipDay)
+    console.log(schemeCodeData, schemeCodeData.data)
     if (findIndexFlag) {
         SIPValuationDateNavData = schemeCodeData.data.findIndex((obj) => obj.date == formatedDate)
     } else {
@@ -344,7 +345,7 @@ async function filterValuationDateData(findIndexFlag, SIPValuationDateNavData, s
             formatedDate = await LibFunction.formateDateLib(new Date(SIPLastDate).setDate(new Date(SIPLastDate).getDate() - skipDay))
         }
         skipDay++
-        SIPValuationDateNavData = filterValuationDateData(SIPValuationDateNavData, schemeCodeData, formatedDate, skipDay, SIPLastDate)
+        SIPValuationDateNavData = filterValuationDateData(findIndexFlag, SIPValuationDateNavData, schemeCodeData, formatedDate, skipDay, SIPLastDate)
     }
     return SIPValuationDateNavData
 }
