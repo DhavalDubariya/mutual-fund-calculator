@@ -90,6 +90,15 @@ const calculateSIPPerformanceModule = async (req) => {
         }
     }
 
+    const schemeCodeMaxDate = new Date(`${schemeCodeData.data[0].date.split("-")[2]}-${schemeCodeData.data[0].date.split("-")[1]}-${schemeCodeData.data[0].date.split("-")[0]}`)
+    const schemeCodeMinDate = new Date(`${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[2]}-${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[1]}-${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[0]}`)
+    if (schemeCodeMaxDate < SIPStartDate || schemeCodeMinDate > SIPStartDate || schemeCodeMaxDate < valuationDate || schemeCodeMinDate > valuationDate) {
+        return {
+            status: false,
+            error: constant.requestMessages.ERR_DATE_OUT_OF_BOUND
+        }
+    }
+
     const monthDiff = differenceInMonths(new Date(SIPEndDate), new Date(SIPStartDate)) + 1
     const totalAmountInvested = monthDiff * Number(SIPAmount)
 
@@ -112,15 +121,6 @@ const calculateSIPPerformanceModule = async (req) => {
     const cagrValue = finalValue ** raiseValue
 
     var finalTableData = []
-
-    const schemeCodeMaxDate = new Date(`${schemeCodeData.data[0].date.split("-")[2]}-${schemeCodeData.data[0].date.split("-")[1]}-${schemeCodeData.data[0].date.split("-")[0]}`)
-    const schemeCodeMinDate = new Date(`${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[2]}-${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[1]}-${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[0]}`)
-    // if (schemeCodeMaxDate < SIPStartDate || schemeCodeMinDate > SIPStartDate || schemeCodeMaxDate < valuationDate || schemeCodeMinDate > valuationDate) {
-    //     return {
-    //         status: false,
-    //         error: constant.requestMessages.ERR_DATE_OUT_OF_BOUND
-    //     }
-    // }
 
     finalTableData = await setFinalData(finalTableData, monthDiff, SIPStartDate, SIPAmount, schemeCodeData, schemeCodeMaxDate, schemeCodeMinDate, SIPAmount, skipDay)
 
@@ -169,6 +169,18 @@ const navFinderModule = async (req) => {
     const schemeCodeData = JSON.parse(getSchemeCodeData.data)
     if (schemeCodeData.length == 0 || !JSON.parse(getSchemeCodeData.data)) {
         return getSchemeCodeData
+    }
+
+    SIPStartDate = new Date(SIPStartDate)
+    SIPEndDate = new Date(SIPEndDate)
+
+    const schemeCodeMaxDate = new Date(`${schemeCodeData.data[0].date.split("-")[2]}-${schemeCodeData.data[0].date.split("-")[1]}-${schemeCodeData.data[0].date.split("-")[0]}`)
+    const schemeCodeMinDate = new Date(`${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[2]}-${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[1]}-${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[0]}`)
+    if (schemeCodeMaxDate < SIPStartDate || schemeCodeMinDate > SIPStartDate || schemeCodeMaxDate < SIPEndDate || schemeCodeMinDate > SIPEndDate) {
+        return {
+            status: false,
+            error: constant.requestMessages.ERR_DATE_OUT_OF_BOUND
+        }
     }
 
     const skipDay = 1
@@ -283,7 +295,7 @@ module.exports = {
 async function setFinalData(finalTableData, monthDiff, SIPStartDate, SIPAmount, schemeCodeData, schemeCodeMaxDate, schemeCodeMinDate, SIPAmount, skipDay) {
     var schemeNAVData = []
     for (let i = 0; i < monthDiff; i++) {
-        // console.log(i)
+        console.log(i)
         finalTableData[i] = {}
 
         if (i == 0) {
@@ -310,7 +322,7 @@ async function setFinalData(finalTableData, monthDiff, SIPStartDate, SIPAmount, 
 }
 
 async function filterStartDateData(findIndexFlag, SIPStartDateNavData, schemeCodeData, formatedSIPDate, skipDay, SIPStartDate) {
-    // console.log("filterStartDateData", skipDay, formatedSIPDate)
+    console.log("filterStartDateData", skipDay, formatedSIPDate)
     if (findIndexFlag) {
         SIPStartDateNavData = schemeCodeData.data.findIndex((obj) => obj.date == formatedSIPDate)
     } else {

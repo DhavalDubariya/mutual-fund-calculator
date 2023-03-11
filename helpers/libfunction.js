@@ -44,6 +44,7 @@ const getResponseURL = async (options) => {
         //         error: constant.inValidAuthentication
         //     }
         // }
+        console.log(response);
 
         return {
             status: true,
