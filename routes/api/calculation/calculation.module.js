@@ -130,7 +130,7 @@ const calculateSIPPerformanceModule = async (req) => {
         "profit_loss": await formatNumber(currentValue - totalAmountInvested),
         "sip_amount": await formatNumber(SIPAmount),
         "current_nav": await formatNumber(valuationDateNav),
-        "cagr": await formatNumber(cagrValue * 100),
+        "cagr": await formatNumber((cagrValue - 1) * 100),
         "absolute_return": await formatNumber(((currentValue - totalAmountInvested) / totalAmountInvested) * 100),
         "graph_data": finalTableData
     }
