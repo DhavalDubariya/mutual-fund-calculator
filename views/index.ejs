@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <title>Calculators</title>
+    <style>
+      .btn-outline-secondary{
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    
+    -->
+
+   
+
+    <div class="container">
+      <div class="row" >
+      <div class="col-md-4" >
+        <a href="/app/calculator/mf-sip"> <button type="button" style="width:100%" class="btn btn-outline-secondary">SIP Performance</button></a>
+        <a href="/app/calculator/sip"> <button type="button" style="width:100%" class="btn btn-outline-secondary">SIP Calculator</button></a>
+        <a href="/app/calculator/lumpsum"> <button type="button" style="width:100%" class="btn btn-outline-secondary">Lumpsum Calculator</button></a>
+        <a href="/app/calculator/car-loan"> <button type="button" style="width:100%" class="btn btn-outline-secondary">Car Planning Though SIP</button></a>
+        <a href="/app/calculator/compund-interest"> <button type="button" style="width:100%" class="btn btn-outline-secondary">Compound Interest</button></a>
+        <a href="/app/calculator/car-planing"> <button type="button" style="width:100%" class="btn btn-outline-secondary">Car Planning</button></a>
+        <a href="/app/calculator/nav-finder"> <button type="button" style="width:100%" class="btn btn-outline-secondary">Nav Finder</button></a>
+        <a href="/app/calculator/top-perfomer"> <button type="button" style="width:100%" class="btn btn-outline-secondary">Top Performance</button></a>
+        
+      </div>
+      <div class="col-md-8" >
+      <div class="row">
+        <div class="col-md-12">
+          <h2>SIP Performance
+          </h2>
+        </div>
+        <div class="col-md-12">
+          <form action="" id="loginform">
+            <div class="select_fund">
+              <label for="Select_Fund" class="label_text">Select Fund</label>
+              <select
+                class="form-select"
+                id="Select_Fund"
+                aria-label="Default select example"
+              >
+                <option selected>Select</option>
+              </select>
+            </div>
+            <div class="amount_date">
+              <br />
+              <div>
+                <label for="SIP_amount" class="label_text">SIP amount</label>
+                <input type="text" class="form-control" id="sip_amount" />
+              </div>
+              <br />
+              <div>
+                <label for="SIP_start_date" class="label_text"
+                  >SIP Start Date</label
+                >
+                <input type="date" class="form-control" id="sip_start_date" />
+              </div>
+              <br />
+              <div>
+                <label for="SIP_end_date" class="label_text"
+                  >SIP End Date</label
+                >
+                <input type="date" class="form-control" id="sip_end_date" />
+              </div>
+            </div>
+            <br />
+            <div class="validatity">
+              <label for="validation" class="label_text"
+                >Validation As On</label
+              >
+              <input type="date" class="form-control" id="validation_date" />
+            </div>
+          </form>
+          <br />
+          <button
+            type="button"
+            onclick="loginButtton()"
+            class="btn btn-outline-primary"
+          >
+            Primary
+          </button>
+        </div>
+      </div>
+      <br />
+      <div class="row">
+        <div class="col-md-12" style="text-align: center">
+          <h3>SIP Performance Summary</h3>
+        </div>
+        <div class="col-md-12">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Amount Invested</th>
+                <th>Current Value</th>
+                <th>Profit/Loss</th>
+                <th>SIP Amount</th>
+                <th>Current NAV</th>
+                <th>CAGR(%)</th>
+                <th>Absolute Return(%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="sip_performance"></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <br />
+      <div class="row">
+        <div class="col-md-12">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Amt.</th>
+                <th>NAV</th>
+                <th>Unit</th>
+                <th>Cumulative Unit</th>
+                <th>Cumulative Amt.</th>
+              </tr>
+            </thead>
+            <tbody id="graph_data_values"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        $.ajaxSetup({
+          type: "POST",
+          data: {},
+          dataType: "json",
+          xhrFields: {
+            withCredentials: true,
+          },
+          crossDomain: true,
+        });
+
+        var schemeCode;
+      });
+
+      $("#Select_Fund").on("change", function () {
+        schemeCode = $(this).find(":selected").val();
+        schemeCode = parseInt(schemeCode)
+      });
+
+      userMeLogin();
+      function userMeLogin() {
+        $.ajax({
+          type: "GET",
+          url: "https://api.mfapi.in/mf",
+          success: function (data, textStatus, xhr) {
+            for (let i = 0; i < data.length; i++) {
+              $("#Select_Fund").append(
+                `<option id="${i}" class="option_selected" value="${data[i].schemeCode}" >${data[i].schemeName}</option>`
+              );
+            }
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            console.log(errorThrown);
+          },
+        });
+      }
+
+      function loginButtton() {
+        var formfdata = $("#loginform").serializeArray();
+        var sipAmount = $("#sip_amount").val();
+        sipAmount = parseInt(sipAmount)
+        var sipStartDate = $("#sip_start_date").val();
+        var sipEndDate = $("#sip_end_date").val();
+        var validationDate = $("#validation_date").val();
+        data = {
+          scheme_code: schemeCode,
+          sip_amount: sipAmount,
+          sip_start_date: sipStartDate,
+          sip_end_date: sipEndDate,
+          valuation_date: validationDate,
+        };
+        // data = {
+        //   scheme_code: 131896,
+        //   sip_amount: 10000,
+        //   sip_start_date: "2022-03-01",
+        //   sip_end_date: "2023-02-02",
+        //   valuation_date: "2023-03-03",
+        // };
+        console.log(data);
+        $("#sip_performance").empty();
+        $.ajax({
+          type: "POST",
+          url: "/api/calculation/calculate-sip-performance",
+          data: data,
+          success: function (data, textStatus, xhr) {
+            console.log(data);
+            if (data.status == true) {
+              console.log(data.data);
+              $("#sip_performance").append(`
+                <th>${data.data.total_amount_invested}</th>
+                <th>${data.data.current_value}</th>
+                <th>${data.data.profit_loss}</th>
+                <th>${data.data.sip_amount}</th>
+                <th>${data.data.current_nav}</th>  
+                <th>${data.data.cagr}</th>
+                <th>${data.data.absolute_return}</th>`);
+
+              for (let i = 0; i < data.data.graph_data.length; i++) {
+                $("#graph_data_values").append(`
+                <tr>
+                <td>${data.data.graph_data[i].date}</td>
+                <td>AMT</td>
+                <td>${data.data.graph_data[i].nav}</td>
+                <td>${data.data.graph_data[i].unit}</td>
+                <td>${data.data.graph_data[i].cumulative_unit}</td>
+                <td>${data.data.graph_data[i].cumulative_amount}</td>
+                </tr>`);
+              }
+            }
+
+            if (data.status == false) {
+              alert(data.error.message);
+            }
+          },
+          error: function (xhr, textStatus, errorThrown) {
+            alert(data.error.message);
+          },
+        });
+      }
+    </script>
+  </body>
+</html>
