@@ -50,13 +50,19 @@ const getMutualFundsSchemeListModule = async () => {
                 "Content-Type": "application/json"
             }
         }
-        const getSchemeData = await libfunction.getResponseURL(options)
+        const getSchemeData = await LibFunction.getResponseURL(options)
+        console.log(getSchemeData, JSON.parse(getSchemeData.data))
         if (!getSchemeData.status) {
             return getSchemeData
         }
 
+        const schemeData = JSON.parse(getSchemeData.data)
+        if (schemeData.length == 0 || !schemeData) {
+            return getSchemeData
+        }
+        console.log("done")
         var result = []
-        for (let i = 0; i < getSchemeData.data.length; i++) {
+        for (let i = 0; i < schemeData.length; i++) {
             // const schemeDataURL = `https://api.mfapi.in/mf/${response1[i].schemeCode}`
 
             // const payload = {
@@ -94,8 +100,8 @@ const getMutualFundsSchemeListModule = async () => {
             // }
 
             var data = {
-                "schemeCode": getSchemeData.data[i].schemeCode,
-                "schemeName": getSchemeData.data[i].schemeName
+                "schemeCode": schemeData[i].schemeCode,
+                "schemeName": schemeData[i].schemeName
             }
             result.push(data)
         }
