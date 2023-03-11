@@ -22,9 +22,15 @@ const finacialCompoundInterestController = async(req,res) => {
     return res.send(result)
 }
 
+const finacialCarPlaninfController = async(req,res) => {
+    var result = await financialModule.finacialCarPlaninfModule(req)
+    return res.send(result)
+}
+
 module.exports = {
     finacialSpiController: finacialSpiController,
     finacialLumpSumController:finacialLumpSumController,
     finacialCarloneController:finacialCarloneController,
-    finacialCompoundInterestController:finacialCompoundInterestController
+    finacialCompoundInterestController:finacialCompoundInterestController,
+    finacialCarPlaninfController:finacialCarPlaninfController
 }
