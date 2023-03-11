@@ -2,10 +2,48 @@ const express = require("express")
 const router = express.Router()
 const dotenv = require("dotenv").config()
 const request = require("request")
+const { JSDOM } = require("jsdom")
 const { differenceInMonths } = require("date-fns")
 const moment = require("moment")
 const LibFunction = require("../../../helpers/libfunction")
 const constant = require("../../../helpers/constant")
+const fundTypeArr = [
+    "arbitrage",
+    "Balanced/Aggressive",
+    "Banking-PSU",
+    "Conservative",
+    "Corporate-Bond",
+    "Credit-Risk",
+    "Dividend-Yield",
+    "Dynamic-Bond",
+    "Dynamic-Asset-Allocation",
+    "Equity-Savings",
+    "ELSS",
+    "Focused",
+    "FOF",
+    "FMP",
+    "Floaters",
+    "Gilt",
+    "Gilt-10-Yrs-Constant-Duration",
+    "Index-Funds",
+    "Large-cap",
+    "Liquid",
+    "Low-Duration",
+    "Long-Duration",
+    "Medium-Duration",
+    "Med-to-Long-Duration",
+    "Mid-Cap",
+    "Money-Market",
+    "Multi-Asset-Alloc",
+    "Multi-Cap",
+    "Overnight",
+    "Retirement",
+    "Sectoral/Thematic",
+    "Short-Duration",
+    "Small-Cap",
+    "Ultra-Short-Duration",
+    "Value/Contra"
+]
 
 const calculateSIPPerformanceModule = async (req) => {
     const schemeCode = req.body.scheme_code
@@ -21,8 +59,15 @@ const calculateSIPPerformanceModule = async (req) => {
         }
     }
 
-    const getSchemeCodeData = await LibFunction.getResponseURL(schemeCode)
-    if (!getSchemeCodeData.status) {
+    const options = {
+        url: `${process.env.MUTUAL_FUNDS_URL}/${schemeCode}`,
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }
+
+    const getSchemeCodeData = await LibFunction.getResponseURL(options)
+    if (!getSchemeCodeData.status || getSchemeCodeData.data.data.length == 0) {
         return getSchemeCodeData
     }
 
@@ -34,6 +79,13 @@ const calculateSIPPerformanceModule = async (req) => {
     SIPStartDate = new Date(SIPStartDate)
     SIPEndDate = new Date(SIPEndDate)
     valuationDate = new Date(valuationDate)
+
+    if (SIPStartDate >= SIPEndDate || valuationDate < SIPEndDate) {
+        return {
+            status: false,
+            error: constant.requestMessages.ERR_INVALID_DATE
+        }
+    }
 
     const monthDiff = differenceInMonths(new Date(SIPEndDate), new Date(SIPStartDate)) + 1
     const totalAmountInvested = monthDiff * Number(SIPAmount)
@@ -56,12 +108,12 @@ const calculateSIPPerformanceModule = async (req) => {
 
     const schemeCodeMaxDate = new Date(`${schemeCodeData.data[0].date.split("-")[2]}-${schemeCodeData.data[0].date.split("-")[1]}-${schemeCodeData.data[0].date.split("-")[0]}`)
     const schemeCodeMinDate = new Date(`${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[2]}-${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[1]}-${schemeCodeData.data[schemeCodeData.data.length - 1].date.split("-")[0]}`)
-    if (schemeCodeMaxDate < SIPStartDate || schemeCodeMinDate > SIPStartDate || schemeCodeMaxDate < valuationDate || schemeCodeMinDate > valuationDate) {
-        return {
-            status: false,
-            error: constant.requestMessages.ERR_DATE_OUT_OF_BOUND
-        }
-    }
+    // if (schemeCodeMaxDate < SIPStartDate || schemeCodeMinDate > SIPStartDate || schemeCodeMaxDate < valuationDate || schemeCodeMinDate > valuationDate) {
+    //     return {
+    //         status: false,
+    //         error: constant.requestMessages.ERR_DATE_OUT_OF_BOUND
+    //     }
+    // }
 
     finalTableData = await setFinalData(finalTableData, monthDiff, SIPStartDate, SIPAmount, schemeCodeData, schemeCodeMaxDate, schemeCodeMinDate, SIPAmount, skipDay)
 
@@ -90,7 +142,13 @@ const navFinderModule = async (req) => {
         }
     }
 
-    const getSchemeCodeData = await LibFunction.getResponseURL(schemeCode)
+    const options = {
+        url: `${process.env.MUTUAL_FUNDS_URL}/${schemeCode}`,
+        headers: {
+            "Content-Type": "application/json"
+        }
+    }
+    const getSchemeCodeData = await LibFunction.getResponseURL(options)
     if (!getSchemeCodeData.status) {
         return getSchemeCodeData
     }
@@ -121,9 +179,91 @@ const navFinderModule = async (req) => {
     }
 }
 
+const getTopPerformerModule = async (req) => {
+    const fundTypeId = req.query.fund_type_id - 1
+    // console.log(fundTypeId, fundTypeArr[fundTypeId])
+    const options = {
+        url: `https://my-eoffice.com/advisor/calculatornew/all_calculator/show_fund_calc_CLS.php?cat=${fundTypeArr[fundTypeId]}&bg=&fc=#`
+    }
+    const getTopPerformeData = await LibFunction.getResponseURL(options)
+    if (!getTopPerformeData.status) {
+        return getTopPerformeData
+    }
+
+    const htmlString = getTopPerformeData.data
+    const dom = new JSDOM(htmlString)
+
+    // const fullHtml = dom.window.document.documentElement.outerHTML
+    // return fullHtml
+
+    // Obtain HTML Text Content
+    var result = []
+    const element2 = dom.window.document.querySelectorAll(".item2")
+    for (let i = 0; i < element2.length; i++) {
+        result[i] = {}
+        result[i]["scheme_name"] = element2[i].textContent.trim().replace("  Why this Fund  Close", "") ? element2[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+    }
+
+    const element3 = dom.window.document.querySelectorAll(".item3")
+    for (let i = 0; i < element2.length; i++) {
+        result[i]["nav"] = element3[i].textContent.trim().replace("  Why this Fund  Close", "") ? element3[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+    }
+
+    const element4 = dom.window.document.querySelectorAll(".item4")
+    for (let i = 0; i < element2.length; i++) {
+        result[i]["1_week"] = element4[i].textContent.trim().replace("  Why this Fund  Close", "") ? element4[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+    }
+
+    const element5 = dom.window.document.querySelectorAll(".item5")
+    for (let i = 0; i < element2.length; i++) {
+        result[i]["1_month"] = element5[i].textContent.trim().replace("  Why this Fund  Close", "") ? element5[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+    }
+
+    const element6 = dom.window.document.querySelectorAll(".item6")
+    for (let i = 0; i < element2.length; i++) {
+        result[i]["3_month"] = element6[i].textContent.trim().replace("  Why this Fund  Close", "") ? element6[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+    }
+
+    const element7 = dom.window.document.querySelectorAll(".item7")
+    for (let i = 0; i < element2.length; i++) {
+        result[i]["6_month"] = element7[i].textContent.trim().replace("  Why this Fund  Close", "") ? element7[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+    }
+
+    const element8 = dom.window.document.querySelectorAll(".item8")
+    for (let i = 0; i < element2.length; i++) {
+        result[i]["9_month"] = element8[i].textContent.trim().replace("  Why this Fund  Close", "") ? element8[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+    }
+
+    const element9 = dom.window.document.querySelectorAll(".item9")
+    for (let i = 0; i < element2.length; i++) {
+        result[i]["1_year"] = element9[i].textContent.trim().replace("  Why this Fund  Close", "") ? element9[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+    }
+
+    const element10 = dom.window.document.querySelectorAll(".item10")
+    for (let i = 0; i < element2.length; i++) {
+        result[i]["3_year"] = element10[i].textContent.trim().replace("  Why this Fund  Close", "") ? element10[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+    }
+
+    const element11 = dom.window.document.querySelectorAll(".item11")
+    for (let i = 0; i < element2.length; i++) {
+        result[i]["5_year"] = element11[i].textContent.trim().replace("  Why this Fund  Close", "") ? element11[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+    }
+
+    const element12 = dom.window.document.querySelectorAll(".item12")
+    for (let i = 0; i < element2.length; i++) {
+        result[i]["SI"] = element12[i].textContent.trim().replace("  Why this Fund  Close", "") ? element12[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+    }
+
+    return {
+        status: true,
+        data: result
+    }
+}
+
 module.exports = {
     calculateSIPPerformanceModule: calculateSIPPerformanceModule,
-    navFinderModule: navFinderModule
+    navFinderModule: navFinderModule,
+    getTopPerformerModule: getTopPerformerModule
 }
 
 async function setFinalData(finalTableData, monthDiff, SIPStartDate, SIPAmount, schemeCodeData, schemeCodeMaxDate, schemeCodeMinDate, SIPAmount, skipDay) {
