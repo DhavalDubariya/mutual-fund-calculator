@@ -21,5 +21,9 @@ module.exports.requestMessages = {
     ERR_DATE_OUT_OF_BOUND: {
         code: 9002,
         message: "Error! The fund you have selected has no related data with the dates you have selected."
+    },
+    ERR_INVALID_DATE: {
+        code: 9003,
+        message: "Please input valid date to calculate data."
     }
 }

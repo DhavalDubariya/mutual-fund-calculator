@@ -2,6 +2,6 @@ var express = require("express")
 const router = express.Router()
 const globalController = require("./global.controller")
 
-router.use("/get-mutual-funds-list", globalController.getMutualFundsListController)
-
+router.get("/get-mutual-funds-scheme-list", globalController.getMutualFundsSchemeListController)
+router.get("/get-fund-types", globalController.getFundTypesController)
 module.exports = router

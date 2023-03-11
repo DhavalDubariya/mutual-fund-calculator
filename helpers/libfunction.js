@@ -24,31 +24,32 @@ const getRandomString = async (len) => {
     return result
 }
 
-const getResponseURL = async (schemeCode) => {
+const getResponseURL = async (options) => {
     try {
-        const options = {
-            url: schemeCode ? `${process.env.MUTUAL_FUNDS_URL}/${schemeCode}` : process.env.MUTUAL_FUNDS_URL,
-            headers: {
-                "Content-Type": "application/json"
-            }
-        }
-
         var response = await new Promise(function (resolve, reject) {
+            console.log("entry 1")
             request.get(options, (error, result) => {
+                console.log("entry 2")
                 if (error) throw new Error(error)
-                var data = JSON.parse(result.body)
-                // console.log("result: ", data)
+                if (isHTML(result.body)) {
+                    console.log("entry 4")
+                    var data = result.body
+                } else {
+                    console.log("entry 5")
+                    var data = JSON.parse(result.body)
+                }
+                console.log("exit")
                 resolve(data)
             })
         })
 
-        if (response.data.length == 0) {
+        if (!isHTML(response) && response.data.length == 0) {
             return {
                 status: false,
                 error: constant.inValidAuthentication
             }
         }
-        
+
         return {
             status: true,
             data: response
@@ -65,4 +66,11 @@ module.exports = {
     formateDateLib: formateDateLib,
     getRandomString: getRandomString,
     getResponseURL: getResponseURL
+}
+
+async function isHTML(str) {
+    console.log("entry 3")
+    var htmlRegex = /<\/?[a-z][^>]*>/i
+    str = str.substring(0, 1000)
+    return htmlRegex.test(str)
 }
