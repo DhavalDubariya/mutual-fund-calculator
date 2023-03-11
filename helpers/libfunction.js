@@ -31,24 +31,19 @@ const getResponseURL = async (options) => {
             request.get(options, (error, result) => {
                 console.log("entry 2")
                 if (error) throw new Error(error)
-                if (isHTML(result.body)) {
-                    console.log("entry 4")
-                    var data = result.body
-                } else {
-                    console.log("entry 5")
-                    var data = JSON.parse(result.body)
-                }
+
+                var data = result.body
                 console.log("exit")
                 resolve(data)
             })
         })
 
-        if (!isHTML(response) && response.data.length == 0) {
-            return {
-                status: false,
-                error: constant.inValidAuthentication
-            }
-        }
+        // if (response.data.length == 0) {
+        //     return {
+        //         status: false,
+        //         error: constant.inValidAuthentication
+        //     }
+        // }
 
         return {
             status: true,

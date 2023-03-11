@@ -67,13 +67,16 @@ const calculateSIPPerformanceModule = async (req) => {
     }
 
     const getSchemeCodeData = await LibFunction.getResponseURL(options)
-    if (!getSchemeCodeData.status || getSchemeCodeData.data.data.length == 0) {
+    console.log(getSchemeCodeData)
+    if (!getSchemeCodeData.status) {
         return getSchemeCodeData
     }
-
     console.log(getSchemeCodeData)
 
-    const schemeCodeData = getSchemeCodeData.data
+    const schemeCodeData = JSON.parse(getSchemeCodeData.data)
+    if (schemeCodeData.length == 0 || !JSON.parse(getSchemeCodeData.data)) {
+        return getSchemeCodeData
+    }
 
     const skipDay = 1
     SIPStartDate = new Date(SIPStartDate)
@@ -127,7 +130,11 @@ const calculateSIPPerformanceModule = async (req) => {
         "absolute_return": await formatNumber(((currentValue - totalAmountInvested) / totalAmountInvested) * 100),
         "graph_data": finalTableData
     }
-    return data
+
+    return {
+        status: true,
+        data: data
+    }
 }
 
 const navFinderModule = async (req) => {
@@ -155,7 +162,10 @@ const navFinderModule = async (req) => {
 
     console.log(getSchemeCodeData)
 
-    const schemeCodeData = getSchemeCodeData.data
+    const schemeCodeData = JSON.parse(getSchemeCodeData.data)
+    if (schemeCodeData.length == 0 || !JSON.parse(getSchemeCodeData.data)) {
+        return getSchemeCodeData
+    }
 
     const skipDay = 1
     var formatedSIPStartDate = await LibFunction.formateDateLib(SIPStartDate)
@@ -211,42 +221,42 @@ const getTopPerformerModule = async (req) => {
 
     const element4 = dom.window.document.querySelectorAll(".item4")
     for (let i = 0; i < element2.length; i++) {
-        result[i]["1_week"] = element4[i].textContent.trim().replace("  Why this Fund  Close", "") ? element4[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+        result[i]["one_week"] = element4[i].textContent.trim().replace("  Why this Fund  Close", "") ? element4[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
     }
 
     const element5 = dom.window.document.querySelectorAll(".item5")
     for (let i = 0; i < element2.length; i++) {
-        result[i]["1_month"] = element5[i].textContent.trim().replace("  Why this Fund  Close", "") ? element5[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+        result[i]["one_month"] = element5[i].textContent.trim().replace("  Why this Fund  Close", "") ? element5[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
     }
 
     const element6 = dom.window.document.querySelectorAll(".item6")
     for (let i = 0; i < element2.length; i++) {
-        result[i]["3_month"] = element6[i].textContent.trim().replace("  Why this Fund  Close", "") ? element6[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+        result[i]["three_month"] = element6[i].textContent.trim().replace("  Why this Fund  Close", "") ? element6[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
     }
 
     const element7 = dom.window.document.querySelectorAll(".item7")
     for (let i = 0; i < element2.length; i++) {
-        result[i]["6_month"] = element7[i].textContent.trim().replace("  Why this Fund  Close", "") ? element7[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+        result[i]["six_month"] = element7[i].textContent.trim().replace("  Why this Fund  Close", "") ? element7[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
     }
 
     const element8 = dom.window.document.querySelectorAll(".item8")
     for (let i = 0; i < element2.length; i++) {
-        result[i]["9_month"] = element8[i].textContent.trim().replace("  Why this Fund  Close", "") ? element8[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+        result[i]["nine_month"] = element8[i].textContent.trim().replace("  Why this Fund  Close", "") ? element8[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
     }
 
     const element9 = dom.window.document.querySelectorAll(".item9")
     for (let i = 0; i < element2.length; i++) {
-        result[i]["1_year"] = element9[i].textContent.trim().replace("  Why this Fund  Close", "") ? element9[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+        result[i]["one_year"] = element9[i].textContent.trim().replace("  Why this Fund  Close", "") ? element9[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
     }
 
     const element10 = dom.window.document.querySelectorAll(".item10")
     for (let i = 0; i < element2.length; i++) {
-        result[i]["3_year"] = element10[i].textContent.trim().replace("  Why this Fund  Close", "") ? element10[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+        result[i]["three_year"] = element10[i].textContent.trim().replace("  Why this Fund  Close", "") ? element10[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
     }
 
     const element11 = dom.window.document.querySelectorAll(".item11")
     for (let i = 0; i < element2.length; i++) {
-        result[i]["5_year"] = element11[i].textContent.trim().replace("  Why this Fund  Close", "") ? element11[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
+        result[i]["five_year"] = element11[i].textContent.trim().replace("  Why this Fund  Close", "") ? element11[i].textContent.trim().replace("  Why this Fund  Close", "") : ""
     }
 
     const element12 = dom.window.document.querySelectorAll(".item12")
