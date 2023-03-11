@@ -313,9 +313,9 @@ async function setFinalData(finalTableData, monthDiff, SIPStartDate, SIPAmount, 
         finalTableData[i]["date"] = schemeNAVData[0]["date"]
         finalTableData[i]["sip_amount"] = await formatNumber(SIPAmount)
         finalTableData[i]["nav"] = await formatNumber(schemeNAVData[0]["nav"])
-        finalTableData[i]["unit"] = await formatNumber(SIPAmount / schemeNAVData[0]["nav"])
-        finalTableData[i]["cumulative_unit"] = i > 0 ? await formatNumber(finalTableData[i - 1]["cumulative_unit"] + SIPAmount / schemeNAVData[0]["nav"]) : await formatNumber(SIPAmount / schemeNAVData[0]["nav"])
-        finalTableData[i]["cumulative_amount"] = i > 0 ? await formatNumber(finalTableData[i - 1]["cumulative_amount"] + SIPAmount) : await formatNumber(SIPAmount)
+        finalTableData[i]["unit"] = await formatNumber(SIPAmount / Number(schemeNAVData[0]["nav"]))
+        finalTableData[i]["cumulative_unit"] = i > 0 ? await formatNumber(Number(finalTableData[i - 1]["cumulative_unit"]) + SIPAmount / Number(schemeNAVData[0]["nav"])) : await formatNumber(SIPAmount / Number(schemeNAVData[0]["nav"]))
+        finalTableData[i]["cumulative_amount"] = i > 0 ? await formatNumber(Number(finalTableData[i - 1]["cumulative_amount"]) + SIPAmount) : await formatNumber(SIPAmount)
     }
     return finalTableData
 }
@@ -366,5 +366,5 @@ async function filterValuationDateData(findIndexFlag, SIPValuationDateNavData, s
 }
 
 async function formatNumber(data) {
-    return Number(Number(data).toFixed(2))
+    return Number(data).toFixed(2)
 }
