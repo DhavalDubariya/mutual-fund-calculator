@@ -2,11 +2,55 @@ const express = require("express")
 const router = express.Router()
 const dotenv = require("dotenv").config()
 const request = require("request")
-const libfunction = require("../../../helpers/libfunction")
+const LibFunction = require("../../../helpers/libfunction")
 
-const getMutualFundsListModule = async () => {
+const fundTypeArr = [
+    "Arbitrage",
+    "Balanced/Aggressive",
+    "Banking & PSU",
+    "Conservative",
+    "Corporate Bond",
+    "Credit-Risk",
+    "Dividend Yield",
+    "Dynamic Bond",
+    "Dynamic Asset Allocation",
+    "Equity Savings",
+    "ELSS",
+    "Focused",
+    "FOF",
+    "FMP",
+    "Floaters",
+    "Gilt",
+    "Gilt 10 Trs Constant Duration",
+    "Index-Funds/ETFs",
+    "Large Cap",
+    "Liquid",
+    "Low Duration",
+    "Long Duration",
+    "Medium Duration",
+    "Med to Long Duration",
+    "Mid Cap",
+    "Money Market",
+    "Multi Asset Alloc",
+    "Multi Cap",
+    "Overnight",
+    "Retirement",
+    "Sectoral/Thematic",
+    "Short Duration",
+    "Small Cap",
+    "Ultra Short Duration",
+    "Value/Contra"
+]
+
+const getMutualFundsSchemeListModule = async () => {
     try {
-        const getSchemeData = await libfunction.getResponseURL()
+        const options = {
+            url: process.env.MUTUAL_FUNDS_URL,
+            headers: {
+                "Content-Type": "application/json"
+            }
+        }
+        const getSchemeData = await libfunction.getResponseURL(options)
         if (!getSchemeData.status) {
             return getSchemeData
         }
@@ -68,6 +112,23 @@ const getMutualFundsListModule = async () => {
     }
 }
 
+const getFundTypesModule = async () => {
+    var result = []
+    for (let i = 0; i < fundTypeArr.length; i++) {
+        var data = {
+            "fund_type_id": i + 1,
+            "fund_type": fundTypeArr[i]
+        }
+        result.push(data)
+    }
+
+    return {
+        status: true,
+        data: result
+    }
+}
+
 module.exports = {
-    getMutualFundsListModule: getMutualFundsListModule
+    getMutualFundsSchemeListModule: getMutualFundsSchemeListModule,
+    getFundTypesModule: getFundTypesModule
 }
