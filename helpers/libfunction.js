@@ -27,13 +27,13 @@ const getRandomString = async (len) => {
 const getResponseURL = async (options) => {
     try {
         var response = await new Promise(function (resolve, reject) {
-            console.log("entry 1")
+            // console.log("entry 1")
             request.get(options, (error, result) => {
-                console.log("entry 2")
+                // console.log("entry 2")
                 if (error) throw new Error(error)
 
                 var data = result.body
-                console.log("exit")
+                // console.log("exit")
                 resolve(data)
             })
         })
@@ -64,7 +64,7 @@ module.exports = {
 }
 
 async function isHTML(str) {
-    console.log("entry 3")
+    // console.log("entry 3")
     var htmlRegex = /<\/?[a-z][^>]*>/i
     str = str.substring(0, 1000)
     return htmlRegex.test(str)
