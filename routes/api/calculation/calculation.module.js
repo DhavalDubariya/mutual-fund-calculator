@@ -106,6 +106,10 @@ const calculateSIPPerformanceModule = async (req) => {
 
     const totalUnitsAccumulated = Number(totalAmountInvested) / Number(StartDateNav)
     const currentValue = Number(totalUnitsAccumulated) * Number(valuationDateNav)
+    const totalInvestmentYear = monthDiff / 12
+    const raiseValue = await formatNumber(1 / totalInvestmentYear)
+    const finalValue = await formatNumber(currentValue / totalAmountInvested)
+    const cagrValue = finalValue ** raiseValue
 
     var finalTableData = []
 
@@ -126,7 +130,7 @@ const calculateSIPPerformanceModule = async (req) => {
         "profit_loss": await formatNumber(currentValue - totalAmountInvested),
         "sip_amount": await formatNumber(SIPAmount),
         "current_nav": await formatNumber(valuationDateNav),
-        "cagr": await formatNumber((currentValue / totalAmountInvested) ** (1 / (monthDiff / 12)) * 100),
+        "cagr": await formatNumber(cagrValue * 100),
         "absolute_return": await formatNumber(((currentValue - totalAmountInvested) / totalAmountInvested) * 100),
         "graph_data": finalTableData
     }
